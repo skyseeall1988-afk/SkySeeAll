@@ -1,0 +1,8 @@
+flask
+geopy
+opencvpython
+twilio
+pyblu==2.0.5
+flask
+psycopg2-binary
+requests
