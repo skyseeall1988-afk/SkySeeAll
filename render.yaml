@@ -1,0 +1,21 @@
+# Exported from Render on 2025-11-15T06:54:43Z
+version: "1"
+projects:
+- name: SkySeeAll
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: SkySeeAll/13
+      runtime: python
+      repo: https://github.com/skyseeall1988-afk/SkySeeAll
+      plan: free
+      envVars:
+      - key: Termux-api
+        sync: false
+      region: ohio
+      buildCommand: pip install -r requirements.txt
+      startCommand: gunicorn SkySeeAll.wsgi
+      autoDeployTrigger: commit
+      previews:
+        generation: automatic
