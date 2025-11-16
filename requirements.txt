@@ -1,0 +1,8 @@
+flask
+psycopg2-binary
+requests
+beautifulsoup4
+gunicorn
+flask-socketio>=5.5.1
+eventlet>=0.40.3
+flask-talisman
