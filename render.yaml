@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: skyseeall-v14
+    runtime: python
+    repo: https://github.com/skyseeall1988-afk/SkySeeAll
+    plan: free
+    branch: main
+    buildFilter:
+      paths:
+        - "app.py"
+        - "requirements.txt"
+        - "package.json"
+        - "src/**"
+        - "templates/**"
+    # V14.3 Unified Build Command
+    # 1. Install Python dependencies via pip
+    # 2. Install Node.js dependencies via npm
+    # 3. Compile React frontend to 'build' directory
+    buildCommand: |
+      pip install -r requirements.txt
+      npm install
+      npm run build
+    # Start command uses Gunicorn with Eventlet worker for SocketIO support
+    startCommand: "gunicorn -k eventlet -w 1 app:app"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: neondb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
