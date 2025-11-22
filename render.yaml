@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: skyseeall-v14
+    runtime: python
+    repo: https://github.com/skyseeall1988-afk/SkySeeAll
+    plan: free
+    branch: main
+    
+    # V14 Build Filter: Only rebuild on relevant changes
+    buildFilter:
+      paths:
+        - "app.py"
+        - "requirements.txt"
+        - "render.yaml"
+
+    # COMMANDS
+    # 1. Install dependencies
+    buildCommand: "pip install -r requirements.txt"
+    
+    # 2. Start Server (Async Eventlet Worker is CRITICAL for SocketIO)
+    startCommand: "gunicorn -k eventlet -w 1 app:app"
+
+    # ENVIRONMENT VARIABLES
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: neondb
+          property: connectionString
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.6
