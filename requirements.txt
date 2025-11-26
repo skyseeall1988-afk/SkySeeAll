@@ -4,6 +4,6 @@ requests==2.31.0
 beautifulsoup4==4.12.2
 gunicorn==21.2.0
 flask-socketio==5.3.6
-eventlet==0.33.3
+eventlet==0.40.3
 flask-talisman==1.1.0
 python-dotenv>=1.0.0
