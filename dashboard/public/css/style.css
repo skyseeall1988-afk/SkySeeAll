@@ -1,0 +1,20 @@
+
+@import url('blue_dog.css');
+
+body {
+    background-color: var(--bg);
+    color: var(--primary);
+    font-family: monospace;
+    margin: 0;
+    padding: 1em;
+}
+
+h1 {
+    color: var(--accent);
+    text-align: center;
+}
+
+#terminal {
+    border: 2px solid var(--primary);
+    padding: 10px;
+}
