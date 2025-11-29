@@ -1,0 +1,101 @@
+/* Microsoft Fluent Design System Inspired Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Microsoft Fluent Color Palette */
+  --primary-blue: #0078D4;
+  --primary-dark: #005A9E;
+  --primary-light: #50E6FF;
+  --bg-dark: #1E1E1E;
+  --bg-darker: #151515;
+  --bg-card: #252525;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --success-green: #107C10;
+  --warning-orange: #FF8C00;
+  --danger-red: #E81123;
+  --border-color: #3D3D3D;
+  
+  /* Fluent Shadows */
+  --shadow-depth-4: 0 1.6px 3.6px rgba(0,0,0,0.13), 0 0.3px 0.9px rgba(0,0,0,0.11);
+  --shadow-depth-8: 0 3.2px 7.2px rgba(0,0,0,0.13), 0 0.6px 1.8px rgba(0,0,0,0.11);
+  --shadow-depth-16: 0 6.4px 14.4px rgba(0,0,0,0.13), 0 1.2px 3.6px rgba(0,0,0,0.11);
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+code {
+  font-family: 'Cascadia Code', 'Courier New', monospace;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Acrylic Effect */
+.acrylic {
+  background: rgba(37, 37, 37, 0.85);
+  backdrop-filter: blur(30px) saturate(125%);
+  border: 1px solid var(--border-color);
+}
+
+/* Reveal Effect on Hover */
+.reveal-hover {
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reveal-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-depth-16);
+}
+
+/* Pulsing Animation for Live Indicators */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glow Effect for Active Elements */
+.glow-blue {
+  box-shadow: 0 0 10px var(--primary-blue), 0 0 20px var(--primary-blue);
+}
+
+.glow-green {
+  box-shadow: 0 0 10px var(--success-green), 0 0 20px var(--success-green);
+}
+
+.glow-red {
+  box-shadow: 0 0 10px var(--danger-red), 0 0 20px var(--danger-red);
+}

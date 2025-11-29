@@ -1,0 +1,81 @@
+.vision-audio {
+  padding: 8px;
+}
+
+.video-player-container {
+  margin: 20px 0;
+}
+
+.video-player {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--bg-darker);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.live-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.no-video {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.no-video p {
+  font-size: 16px;
+  margin: 8px 0;
+}
+
+.no-video .hint {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.video-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.camera-list {
+  margin-top: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.camera-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.camera-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.camera-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.camera-ip {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: 'Cascadia Code', monospace;
+}

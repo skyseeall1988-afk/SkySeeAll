@@ -1,0 +1,153 @@
+.tactical-hud {
+  padding: 8px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hw-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hw-badge.available {
+  background: rgba(16, 124, 16, 0.2);
+  color: var(--success-green);
+  border: 1px solid var(--success-green);
+}
+
+.hw-badge.emulated {
+  background: rgba(255, 140, 0, 0.2);
+  color: var(--warning-orange);
+  border: 1px solid var(--warning-orange);
+}
+
+.hw-badge.unavailable {
+  background: rgba(232, 17, 35, 0.2);
+  color: var(--danger-red);
+  border: 1px solid var(--danger-red);
+}
+
+.badge {
+  padding: 4px 12px;
+  background: var(--primary-blue);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.network-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.network-card {
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.network-card.selected {
+  border-color: var(--primary-blue);
+  background: rgba(0, 120, 212, 0.1);
+}
+
+.network-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.network-ssid {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.signal-strength {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', monospace;
+}
+
+.signal-strength.signal-strong {
+  background: rgba(16, 124, 16, 0.2);
+  color: var(--success-green);
+}
+
+.signal-strength.signal-medium {
+  background: rgba(255, 140, 0, 0.2);
+  color: var(--warning-orange);
+}
+
+.signal-strength.signal-weak {
+  background: rgba(232, 17, 35, 0.2);
+  color: var(--danger-red);
+}
+
+.network-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.detail-label {
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.detail-value.mono {
+  font-family: 'Cascadia Code', monospace;
+  font-size: 12px;
+}
+
+.network-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.fluent-button.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  font-size: 14px;
+}

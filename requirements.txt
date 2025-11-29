@@ -7,3 +7,4 @@ flask-socketio==5.3.6
 eventlet==0.33.3
 flask-talisman==1.1.0
 python-dotenv>=1.0.0
+psutil==5.9.6
