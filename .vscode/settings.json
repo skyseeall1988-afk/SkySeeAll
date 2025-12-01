@@ -1,0 +1,6 @@
+{
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "main"
+    ],
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true
+}
